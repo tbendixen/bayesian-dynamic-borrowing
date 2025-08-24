@@ -90,7 +90,10 @@ div.csl-indent {
 <link href="bdb_blog_files/libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="bdb_blog_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="bdb_blog_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="bdb_blog_files/libs/bootstrap/bootstrap-bb462d781dde1847d9e3ccf7736099dd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="bdb_blog_files/libs/bootstrap/bootstrap-813c323200a87c37e262811031999de4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>
+p { color: #555555; }
+</style>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -122,7 +125,6 @@ window.Quarto = {
 };
 </script>
 
-<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="quarto-light">
@@ -191,7 +193,7 @@ window.Quarto = {
 <p>In essence, BDB allows us to use informative priors, while letting the model figure out how much information to borrow from the prior. The model achieves this by estimating how similar the informative prior is to our current data.</p>
 <p>This in turn has benefits on the operating characteristics of our analysis, such as balancing power gains with Type I error rates, something that drug regulatory agencies – as well as many parts of the scientific community writ large – care about. In that sense, BDB is a hybrid method, shoe-horning informative Bayesian inference into a frequentist framework. Put differently, it’s a way to be Bayesian in a frequentist world.</p>
 <p>To follow along, I assume a basic familiarity with regression modeling and Bayesian statistics as well as with the <code>R</code> programming language <span class="citation" data-cites="rcoreteam2024">(<a href="#ref-rcoreteam2024" role="doc-biblioref">R Core Team 2024</a>)</span>.</p>
-<p>Now, there are <em>many</em> different approaches to BDB – for one overview, see <span class="citation" data-cites="alt2025hdbayes">Alt et al. (<a href="#ref-alt2025hdbayes" role="doc-biblioref">2025</a>)</span>. We’re going to work with the so-called ‘’commensurability parameter’’ approach following <span class="citation" data-cites="hobbs2011hierarchical">Hobbs et al. (<a href="#ref-hobbs2011hierarchical" role="doc-biblioref">2011</a>)</span>.</p>
+<p>Now, there are <em>many</em> different approaches to BDB – for one overview, see <span class="citation" data-cites="alt2025hdbayes">Alt et al. (<a href="#ref-alt2025hdbayes" role="doc-biblioref">2025</a>)</span>. We’re going to work with the so-called “commensurability parameter” approach following <span class="citation" data-cites="hobbs2011hierarchical">Hobbs et al. (<a href="#ref-hobbs2011hierarchical" role="doc-biblioref">2011</a>)</span>.</p>
 </section>
 <section id="we-need-some-data" class="level1">
 <h1>We need some data</h1>
