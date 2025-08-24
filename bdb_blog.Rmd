@@ -3,17 +3,35 @@ title: "Being Bayesian in a Frequentist World"
 subtitle: "A Brief Introduction to Bayesian Dynamic Borrowing in R"
 author: 
   - Theiss Bendixen
-date: today
+date: "2025-08-25"
 date-modified: today
+project:
+  type: website
+website:
+  title: "Being Bayesian in a Frequentist World"
+  site-url: "https://theissbendixen.com/bayesian-dynamic-borrowing/"
+  base-url: "/bayesian-dynamic-borrowing"
+  repo-url: "https://github.com/tbendixen/bayesian-dynamic-borrowing"
 format:
   html:
-    #code-fold: true
-    #code-summary: "Show code"
     toc: true
     output-file: "index"
-    css: styles.css
+    self-contained: true
+    include-in-header: 
+      text: |
+        <style>
+          p {
+            font-family: Libre Franklin, Helvetica, Arial, sans-serif;
+            font-size: 1rem;
+            color: #666666; 
+            }
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+        </style>
 editor: visual
-bibliography: bib.bib
+bibliography: [bib.bib, grateful-refs.bib]
 ---
 
 ```{r setup, include=FALSE}
@@ -43,7 +61,7 @@ This in turn has benefits on the operating characteristics of our analysis, such
 
 To follow along, I assume a basic familiarity with regression modeling and Bayesian statistics as well as with the `R` programming language [@rcoreteam2024].
 
-Now, there are *many* different approaches to BDB -- for one overview, see @alt2025hdbayes. We're going to work with the so-called ''commensurability parameter'' approach following @hobbs2011hierarchical.
+Now, there are *many* different approaches to BDB -- for one overview, see @alt2025hdbayes. We're going to work with the so-called "commensurability parameter" approach following @hobbs2011hierarchical.
 
 # We need some data
 
@@ -100,9 +118,9 @@ library(rethinking)
 model_noborrow <- ulam(
   alist(
     y ~ normal(mu, sigma),
-    mu <- a + treatment*beta_trt,
+    mu <- a + treatment*b,
     a ~ normal(0, 5),
-    beta_trt ~ normal(0, 5),
+    b ~ normal(0, 5),
     sigma ~ exponential(0.5)
   ),
   data = data,
@@ -122,7 +140,7 @@ I'm going to imagine that we have summary statistics from historical data on the
 
 Similarly, I'll illustrate BDB with the use of summary statistics from historical data, since summary statistics is also more widely available than individual-level data. But bear in mind that many BDB approaches can be used with (or even require) individual-level data.
 
-For the sake of illustration, let's imagine that the historical data on the control group, $\alpha_h$, has a mean identical to the true control mean of our current data and a standard deviation, $\sigma_h$, of 1. We add these values to our data list.
+For the sake of illustration, let's imagine that the historical data on the control group has a mean, $\alpha_h$, identical to the true control mean of our current data and a standard deviation, $\sigma_h$, of 1. We add these values to our data list.
 
 ```{r}
 hist_control_mean <- true_control_mean # no conflict btw. historical and current data
@@ -169,11 +187,11 @@ Here's how our BDB model could look in `rethinking`. Again, the syntax satisfyin
 model_bdb <- ulam(
   alist(
     y ~ normal(mu, sigma),
-    mu <- a + treatment*beta_trt,
+    mu <- a + treatment*b,
     
     # new prior for alpha
     a ~ normal(hist_control_mean, sqrt(hist_control_sd^2 + 1/tau)),
-    beta_trt ~ normal(0, 5),
+    b ~ normal(0, 5),
     sigma ~ exponential(0.5),
     
     # tau parameter
@@ -201,13 +219,13 @@ post_bdb <- extract.samples(model_bdb)
 
 # Create a data frame combining both posteriors
 plot_data <- data.frame(
-  beta_trt = c(post_noborrow$beta_trt, post_bdb$beta_trt),
+  b = c(post_noborrow$b, post_bdb$b),
   model = rep(c("No borrowing", "BDB"), 
-              c(length(post_noborrow$beta_trt), length(post_bdb$beta_trt)))
+              c(length(post_noborrow$b), length(post_bdb$b)))
 )
 
 # Plot!
-ggplot(plot_data, aes(y = model, x = beta_trt, slab_alpha = stat(f))) +
+ggplot(plot_data, aes(y = model, x = b, slab_alpha = stat(f))) +
   stat_halfeye(
     .width = 0.95,
     point_interval = "median_hdi",
@@ -750,7 +768,15 @@ This post introduced Bayesian Dynamic Borrowing using `R` and the `rethinking` p
 
 To build intuition for BDB, we also ran a small simulation. This could be expanded in a number of ways, for instance by adding more scenarios and making it more computationally efficient. And of course, there's also much more to BDB than we've covered here. For instance, we haven't considered how to appropriately select historical data sources, derive meta-analytic priors, use individual-level data rather than summary statistics, or how BDB models perform with more complex data or designs -- interested readers could check out @novartisbook as well as @alt2025hdbayes, @psborrow2, and @rbest. For further deep dives on BDB, some starting points include @best2021assessing, @edwards2024using, @kaplan2023bayesian, @hobbs2011hierarchical, and @viele2014use.
 
-Personally, I find it intellectually -- even philosophically -- satisfying to actually make use of historical information whenever possible, aligning well with an ideal of science as a cumulative endeavor. As such, BDB paves a way to be Bayesian in a frequentist world. 
+Personally, I find it intellectually -- even philosophically -- satisfying to actually make use of historical information whenever possible and relevant, aligning well with an ideal of science as a cumulative endeavor. As such, BDB paves a way to be Bayesian in a frequentist world. 
+
+# Software
+
+```{r, cache=TRUE}
+library(grateful)
+pkgs <- cite_packages(output = "table", out.dir = ".", cite.tidyverse = TRUE, dependencies = TRUE)
+knitr::kable(pkgs)
+```
 
 # References
 
