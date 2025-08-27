@@ -802,7 +802,7 @@ ggplot(results_df %>%
 
 I've highlighted in darker colors the scenario where there's prior-data conflict with opposite sign, because that's where most of the action is. We see that -- holding the prior constant -- the conflict scenario with opposite sign consistently has the lowest posterior $\tau$, meaning less borrowing. We also see that $\tau$ decreases as a function of sample size: As sample size increases, the observed data matter more and borrowing decreases as a result. We see the same pattern, although less pronounced, in the other prior-data conflict scenario, where the historical and current data have the same sign. For the no prior-data conflict scenarios, $\tau$ remains relatively high and constant across sample sizes.
 
-Taken together, this is exactly what we want to see: BDB should dynamically adapt to the data and borrow less when the historical data are inconsistent with the current data. 
+Taken together, this is exactly what we want to see: BDB should dynamically adapt to the data and borrow less when the historical data is inconsistent with the current data. 
 
 # Summary
 
