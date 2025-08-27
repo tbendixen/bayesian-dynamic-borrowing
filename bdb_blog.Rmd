@@ -104,9 +104,11 @@ Now, to build up toward implementing BDB, let's first fit a simple Bayesian line
     \sigma &\sim \text{Exponential}(0.5)
 \end{aligned}
 
-We model percentage weight change from baseline $y_i$ using a normal distribution with mean $\mu$ and standard deviation $\sigma$. We model $\mu$ with a regression equation consisting of two terms: an intercept $\alpha$ and a slope $\beta$. These represent the mean % weight change in the control group (when $x_i = 0$) and the treatment effect (when $x_i = 1$), respectively. The priors for $\alpha$, $\beta$ and $\sigma$ are weakly informative.
+We model percentage weight change from baseline $y_i$ using a normal distribution with mean $\mu$ and standard deviation $\sigma$. We model $\mu$ with a regression equation consisting of two terms: an intercept $\alpha$ and a slope $\beta$. These represent the mean % weight change in the control group (when $x_i = 0$) and the treatment effect (when $x_i = 1$), respectively.[^1] The priors for $\alpha$, $\beta$ and $\sigma$ are weakly informative.
 
-To fit this model, we'll use the `rethinking` package [@mcelreath_statistical_2020], an interface to `Stan` [@carpenter2017stan], primarily because it's a useful pedagogical tool. Contrary to other popular Bayesian packages, `rethinking` forces the user to be explicit about the model structure and prior distributions. In our actual day-to-day work, we might want to use the more convenient packages out there, but for learning (and teaching), the `rethinking` package is really unrivaled. 
+[^1]: While (percentage) change scores are much maligned, a basic model like this is very common in weight management trials -- for one example, see @wilding2021once. The model usually also includes something like baseline BMI and a few other prognostic covariates, which we leave out here to keep things simple.
+
+To fit this model, we'll use the `rethinking` package [@mcelreath_statistical_2020], an interface to `Stan` [@carpenter2017stan], primarily because it's a useful pedagogical tool. Contrary to other popular Bayesian packages, `rethinking` forces the user to be explicit about the model structure and prior distributions. In our actual day-to-day work, we might want to use the more convenient packages out there, but for learning (and teaching), the `rethinking` package is really unrivaled.
 
 The `rethinking` package is also much more flexible. For instance, to my knowledge, you couldn't fit a BDB model in popular Bayesian `R` software like `brms` [@burkner2017brms] and `rstanarm` [@rstanarm], at least not without some custom coding. There are, however, dedicated BDB packages out there which one could graduate to -- see e.g., @alt2025hdbayes, @psborrow2, and @rbest.
 
@@ -177,9 +179,9 @@ The second part of the standard deviation, $\frac{1}{\tau}$, reflects an extra l
 
 If the historical data aligns well with what we’re seeing in the current trial, the so-called "commensurability parameter" $\tau$ will tend toward larger values, which reduces the prior variance. This gives $\alpha_h$ more weight in influencing $\alpha$, leading to greater borrowing of information. However, when there’s conflict between the historical data and the current trial data, the model can increase $\frac{1}{\tau}$, effectively inflating the prior variance to down-weight the contribution of the historical data. This is a useful property, because it guards against borrowing too much information from an inappropriate prior.
 
-We can think of $\tau$ in terms of shrinkage in a multilevel model, in that it controls the degree to which an estimate is "shrunk" toward a shared prior distribution, informed in this case by the historical data. Just as in a multilevel model, where shrinkage is guided by the variance of group-level parameters (with small variances pulling estimates closer to the group mean and large variances giving more freedom to individual group estimates), $\tau$ plays a similar role by dynamically adjusting the amount of borrowing from historical data. 
+We can think of $\tau$ in terms of shrinkage in a multilevel model, in that it controls the degree to which an estimate is "shrunk" toward a shared prior distribution, informed in this case by the historical data. Just as in a multilevel model, where shrinkage is guided by the variance of group-level parameters (with small variances pulling estimates closer to the group mean and large variances giving more freedom to individual group estimates), $\tau$ plays a similar role by dynamically adjusting the amount of borrowing from historical data.
 
-And of course, $\tau$ needs a prior, too. The exponential distribution ensures that $\tau$ is positive, which is necessary since it's formally a precision parameter. We've just set the rate of the distribution to 0.5 as a starting point, but since $\tau$ dictates the amount of borrowing, it’s a parameter that we — in a real analysis — need to play around with, for instance through sensitivity analysis (i.e., trying out different priors to make sure results are not inappropriately sensitive to our prior for $\tau$). 
+And of course, $\tau$ needs a prior, too. The exponential distribution ensures that $\tau$ is positive, which is necessary since it's formally a precision parameter. We've just set the rate of the distribution to 0.5 as a starting point, but since $\tau$ dictates the amount of borrowing, it’s a parameter that we — in a real analysis — need to play around with, for instance through sensitivity analysis (i.e., trying out different priors to make sure results are not inappropriately sensitive to our prior for $\tau$).
 
 Here's how our BDB model could look in `rethinking`. Again, the syntax satisfyingly mimics the formal model -- we can more or less simply program in the new priors for $\alpha$ and $\tau$.
 
@@ -206,7 +208,7 @@ model_bdb <- ulam(
 
 # Compare models
 
-Even though we've borrowed historical data for the control group, it's ultimately the treatment effect we're interested in. So let's compare the posterior treatment effect estimates from the model with no borrowing against that of the BDB model. 
+Even though we've borrowed historical data for the control group, it's ultimately the treatment effect we're interested in. So let's compare the posterior treatment effect estimates from the model with no borrowing against that of the BDB model.
 
 ```{r, cache=TRUE}
 #| code-fold: true
@@ -258,7 +260,7 @@ We also vary the prior for $\tau$ to assess how sensitive the operating characte
 
 While power and Type I errors are frequentist concepts, we can approximate them in a Bayesian framework.
 
-For power, we can define a result as "significant" if the 95% quantile interval for the posterior distribution of the treatment effect excludes zero. We then calculate power as the proportion of simulations where the treatment effect is significant. 
+For power, we can define a result as "significant" if the 95% quantile interval for the posterior distribution of the treatment effect excludes zero. We then calculate power as the proportion of simulations where the treatment effect is significant.
 
 We approximate the Type I error rate by simulating datasets under the null, where the true treatment effect is zero. For each dataset, we fit the models and check whether the 95% quantile interval for the treatment effect excludes zero. The Type I error rate is then calculated as the proportion of these null simulations where the result is significant.
 
@@ -755,7 +757,7 @@ ggplot(results_df %>% filter(oc_type == "type1" & sample_size == 100), aes(x = m
 
 ```
 
-Take the upper-left panel first, where there's no prior-data conflict. We see that BDB generally improves statistical power. For instance, under these particular conditions we reach a standard 90% power with a sample size of around 70-80 with the BDB models compared to just short of 100 for the model without borrowing -- that is, a 20-30% reduction in sample size. The three BDB models have quite similar power, although the one with a higher mean prior on $\tau$, `exponential(0.1)`, has slightly more power due to higher degree of borrowing. Note too that we can reap these gains in power without paying a cost in terms of Type I error -- all models have similar Type I error rates and if anything the model without borrowing performs worst. 
+Take the upper-left panel first, where there's no prior-data conflict. We see that BDB generally improves statistical power. For instance, under these particular conditions we reach a standard 90% power with a sample size of around 70-80 with the BDB models compared to just short of 100 for the model without borrowing -- that is, a 20-30% reduction in sample size. The three BDB models have quite similar power, although the one with a higher mean prior on $\tau$, `exponential(0.1)`, has slightly more power due to higher degree of borrowing. Note too that we can reap these gains in power without paying a cost in terms of Type I error -- all models have similar Type I error rates and if anything the model without borrowing performs worst.
 
 In the bottom-left panel, where we have prior-data conflict with the *opposite* sign as the true control mean, we see a similar picture for power: BDB models have higher power than the model without borrowing. But it's more pronounced here. A likely explanation is that the influence of the historical data creates greater contrast between the estimated treatment and control groups, making the treatment effect easier to discern -- while the dynamic borrowing models adaptively discount the historical data under conflict, it allows partial borrowing to still provide some information. However, this comes at the cost of inflated Type I error rates, where all BDB models are above the nominal threshold of 0.05. Whether the higher Type I error rates are acceptable given the substantial power gains can only be evaluated on a case by case basis. For instance, there are probably cases where it's too expensive to miss a true effect, such that we're willing to increase slightly the chance of a false positive to reduce the chance of a false negative.
 
@@ -763,12 +765,52 @@ In the bottom-right panel, where we have prior-data conflict with the *same* sig
 
 Finally, for the upper-right panel, where we have a wider standard deviation for the historical control data but no prior-data conflict, we see that the BDB models have similar power and Type I error rates to that of the model without borrowing. This is because the wider standard deviation in the historical control data weakens the influence of borrowing, which in turn reduces the impact of the prior on the posterior estimates. As a result, the dynamic borrowing models rely more heavily on the current data, making their behavior closer to that of the no-borrowing model.
 
+## A closer look at tau
+
+Let's also take a closer look at $\tau$ to make sure that the BDB models behave as expected. In the following figure, we plot the mean of posterior $\tau$ for each combination of scenario and $\tau$ prior.
+
+```{r, cache=TRUE, fig.width=8, fig.height=4}
+#| code-fold: true
+#| code-summary: "Show the code"
+## TAU
+results_df$scenario_tau <- factor(results_df$scenario,
+                                  levels = c("null_noconflict", "noconflict",
+                                         "null_noConflict_wideSE", "noConflict_wideSE",
+                                         "null_conflict_samesign", "conflict_samesign",
+                                         "null_conflict_oppsign", "conflict_oppsign"))
+
+labs_tau <- c("No Prior-Data Conflict", "No Prior-Data Conflict — Wide SD", "Prior-Data Conflict — Same sign", "Prior-Data Conflict — Opposite sign")
+
+ggplot(results_df %>% 
+         filter(oc_type == "power" & !is.na(mean_tau)), 
+       aes(x = sample_size, y = mean_tau)) +
+  geom_line(aes(color = method, linetype = scenario_tau, alpha = scenario_tau), linewidth = 1) +
+  facet_wrap(~method) + 
+  scale_color_manual(values = c("#2C5F2D", "#97BC62", "#D68C45")) +
+  scale_linetype_manual(values = c("solid", "dashed", "dotted", "dotdash"),
+                        name = "scenario",
+                        label = labs_tau) +
+  scale_alpha_manual(values = c(0.5, 0.5, 0.5, 1),
+                     guide = "none") +
+  ylab("tau") + 
+  xlab("Sample size") +
+  theme_classic() +
+  ggtitle("tau") +
+  guides(color = "none")
+
+```
+
+I've highlighted in darker colors the scenario where there's prior-data conflict with opposite sign, because that's where most of the action is. We see that -- holding the prior constant -- the conflict scenario with opposite sign consistently has the lowest posterior $\tau$, meaning less borrowing. We also see that $\tau$ decreases as a function of sample size: As sample size increases, the observed data matter more and borrowing decreases as a result. We see the same pattern, although less pronounced, in the other prior-data conflict scenario, where the historical and current data have the same sign. For the no prior-data conflict scenarios, $\tau$ remains relatively high and constant across sample sizes.
+
+Taken together, this is exactly what we want to see: BDB should dynamically adapt to the data and borrow less when the historical data are inconsistent with the current data. 
+
 # Summary
-This post introduced Bayesian Dynamic Borrowing using `R` and the `rethinking` package. As we've seen, BDB allows us to use informative priors, while letting the model figure out how much information to borrow from the prior. Given relevant prior information, BDB can help reduce sample size and costs of a trial as well as shorten study timelines. It's particularly useful when study participants are hard to come by, for instance in rare diseases, pediatric populations, and regional studies. 
+
+This post introduced Bayesian Dynamic Borrowing using `R` and the `rethinking` package. As we've seen, BDB allows us to use informative priors, while letting the model figure out how much information to borrow from the prior. Given relevant prior information, BDB can help reduce sample size and costs of a trial as well as shorten study timelines. It's particularly useful when study participants are hard to come by, for instance in rare diseases, pediatric populations, and regional studies.
 
 To build intuition for BDB, we also ran a small simulation. This could be expanded in a number of ways, for instance by adding more scenarios and making it more computationally efficient. And of course, there's also much more to BDB than we've covered here. For instance, we haven't considered how to appropriately select historical data sources, derive meta-analytic priors, use individual-level data rather than summary statistics, or how BDB models perform with more complex data or designs -- interested readers could check out @novartisbook as well as @alt2025hdbayes, @psborrow2, and @rbest. For further deep dives on BDB, some starting points include @best2021assessing, @edwards2024using, @kaplan2023bayesian, @hobbs2011hierarchical, and @viele2014use.
 
-Personally, I find it intellectually -- even philosophically -- satisfying to actually make use of historical information whenever possible and relevant, aligning well with an ideal of science as a cumulative endeavor. As such, BDB paves a way to be Bayesian in a frequentist world. 
+Personally, I find it intellectually -- even philosophically -- satisfying to actually make use of historical information whenever possible and relevant, aligning well with an ideal of science as a cumulative endeavor. As such, BDB paves a way to be Bayesian in a frequentist world.
 
 # Software
 
@@ -783,10 +825,8 @@ knitr::kable(pkgs)
 ::: {#refs}
 :::
 
-# Session info 
+# Session info
 
 ```{r, cache=TRUE}
 sessionInfo()
 ```
-
-
