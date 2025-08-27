@@ -765,7 +765,7 @@ In the bottom-right panel, where we have prior-data conflict with the *same* sig
 
 Finally, for the upper-right panel, where we have a wider standard deviation for the historical control data but no prior-data conflict, we see that the BDB models have similar power and Type I error rates to that of the model without borrowing. This is because the wider standard deviation in the historical control data weakens the influence of borrowing, which in turn reduces the impact of the prior on the posterior estimates. As a result, the dynamic borrowing models rely more heavily on the current data, making their behavior closer to that of the no-borrowing model.
 
-## A closer look at tau
+## A closer look at $\tau$
 
 Let's also take a closer look at $\tau$ to make sure that the BDB models behave as expected. In the following figure, we plot the mean of posterior $\tau$ for each combination of scenario and $\tau$ prior.
 
