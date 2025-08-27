@@ -1,1 +1,1 @@
-Rendered version here: \url{https://theissbendixen.com/bayesian-dynamic-borrowing/}
+Rendered version here: https://theissbendixen.com/bayesian-dynamic-borrowing/
