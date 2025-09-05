@@ -2501,7 +2501,7 @@ window.Quarto = {
     \textcolor{black}{\alpha} &amp;{\; \textcolor{black}{\sim}\; } \textcolor{black}{\text{Normal}(\alpha_h, \sqrt{\sigma_h^2 + \frac{1}{\tau}})} \\
     \textcolor{grey}{\beta} &amp;{\; \textcolor{grey}{\sim}\; } \textcolor{grey}{\text{Normal}(0, 5)} \\
     \textcolor{grey}{\sigma} &amp;{\; \textcolor{grey}{\sim}\; } \textcolor{grey}{\text{Exponential}(0.5)} \\
-    \textcolor{black}{\tau} &amp;{\; \textcolor{black}{\sim}\; } \textcolor{black}{\text{Exponential}(1)}
+    \textcolor{black}{\tau} &amp;{\; \textcolor{black}{\sim}\; } \textcolor{black}{\text{Exponential}(0.5)}
 \end{aligned}\]</span>
 <p>First, let’s look at the new prior on <span class="math inline">\(\alpha\)</span>. The prior is now centered on <span class="math inline">\(\alpha_h\)</span>, the mean derived from the historical control group data, instead of on 0.</p>
 <p>But here’s the really cool bit. The standard deviation of the prior for <span class="math inline">\(\alpha\)</span> is now expressed as <span class="math inline">\(\sqrt{\sigma_h^2 + \frac{1}{\tau}}\)</span>. Let’s break it down. First, the term <span class="math inline">\(\sigma_h^2\)</span> is just the variance of the historical data.</p>
