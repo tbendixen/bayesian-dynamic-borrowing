@@ -168,7 +168,7 @@ We'll then modify our statistical model -- I've highlighted the new bits.
     \textcolor{black}{\alpha} &{\; \textcolor{black}{\sim}\; } \textcolor{black}{\text{Normal}(\alpha_h, \sqrt{\sigma_h^2 + \frac{1}{\tau}})} \\
     \textcolor{grey}{\beta} &{\; \textcolor{grey}{\sim}\; } \textcolor{grey}{\text{Normal}(0, 5)} \\
     \textcolor{grey}{\sigma} &{\; \textcolor{grey}{\sim}\; } \textcolor{grey}{\text{Exponential}(0.5)} \\
-    \textcolor{black}{\tau} &{\; \textcolor{black}{\sim}\; } \textcolor{black}{\text{Exponential}(1)}
+    \textcolor{black}{\tau} &{\; \textcolor{black}{\sim}\; } \textcolor{black}{\text{Exponential}(0.5)}
 \end{aligned}
 
 First, let’s look at the new prior on $\alpha$. The prior is now centered on $\alpha_h$, the mean derived from the historical control group data, instead of on 0.
